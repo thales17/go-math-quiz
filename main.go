@@ -50,6 +50,42 @@ max-width: 4rem;
 	</body>
 </html>
 `
+const resultTempl string = `
+<html>
+	<head>
+		<title>Go Math Quiz</title>
+		<style>
+body {
+	color: white;
+	background-color: black;
+}
+
+main {
+	max-width: 38rem;
+	padding: 2rem;
+	margin: auto;
+	text-align: center;
+}
+code {
+	text-align: left;
+}
+		</style>
+	</head>
+	<body>
+		<main>
+			<code>
+(\_/)<br/>
+<br/>
+( •,•)<br/>
+<br/>
+(")_(")<br/>
+			</code>
+			<p>%s</p>
+			<a href="/">Next Question</a>
+		</main>
+	</body>
+</html>
+`
 
 func calcAnswer(a, b int, op string) (float64, error) {
 	answer := 0.0
@@ -95,26 +131,22 @@ func main() {
 			fmt.Fprintf(w, "ParseForm() err: %v", err)
 			return
 		}
-		fmt.Fprintf(w, "Post from website! r.PostFrom = %v\n", r.PostForm)
 
 		aVal := r.FormValue("a")
 		op := r.FormValue("op")
 		bVal := r.FormValue("b")
 		answerVal := r.FormValue("answer")
 
-		fmt.Fprintf(w, "a = %s\n", aVal)
-		fmt.Fprintf(w, "op = %s\n", op)
-		fmt.Fprintf(w, "b = %s\n", bVal)
-		fmt.Fprintf(w, "answer= %s\n", answerVal)
-
 		a, err := strconv.Atoi(aVal)
 		if err != nil {
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
 			log.Println(err)
 			return
 		}
 
 		b, err := strconv.Atoi(bVal)
 		if err != nil {
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
 			log.Println(err)
 			return
 		}
@@ -122,19 +154,23 @@ func main() {
 		answer, err := strconv.ParseFloat(answerVal, 64)
 		if err != nil {
 			log.Println(err)
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
 			return
 		}
 
 		answerCalc, err := calcAnswer(a, b, op)
 		if err != nil {
 			log.Println(err)
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
 			return
 		}
 
 		if answerCalc == answer {
-			fmt.Fprintf(w, "\n\nCorrect!\n")
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Correct!"))
+			log.Println(fmt.Sprintf("correct,%d,%s,%d", a, op, b))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf("\n\nWrong!\nCorrect Answer:%.1f", answerCalc))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, fmt.Sprintf("Wrong!<br/>Correct Answer:%.1f", answerCalc)))
+			log.Println(fmt.Sprintf("wrong,%d,%s,%d", a, op, b))
 		}
 	})
 
