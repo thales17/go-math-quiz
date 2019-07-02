@@ -127,6 +127,10 @@ func main() {
 	portPtr := flag.Int("port", 8666, "http port used by the web server")
 	levelPtr := flag.Int("level", 2, "level 1 = add, 2 = sub, 3 = mul, 4 = div")
 	flag.Parse()
+	if *levelPtr > 4 || *levelPtr <= 0 {
+		log.Fatal("Invalid level, should be 1-4")
+	}
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ops := []string{"+", "-", "*", "/"}
 		op := ops[rand.Intn(*levelPtr)]
