@@ -26,6 +26,7 @@ main {
 	padding: 2rem;
 	margin: auto;
 	text-align: center;
+	font-size: 3.5em;
 }
 
 input {
@@ -65,7 +66,9 @@ main {
 	padding: 2rem;
 	margin: auto;
 	text-align: center;
+	font-size: 3.5em;
 }
+
 code {
 	text-align: left;
 }
@@ -169,7 +172,7 @@ func main() {
 			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Correct!"))
 			log.Println(fmt.Sprintf("correct,%d,%s,%d", a, op, b))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, fmt.Sprintf("Wrong!<br/>Correct Answer:%.1f", answerCalc)))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, fmt.Sprintf("Wrong!<br/>Correct Answer: %.1f", answerCalc)))
 			log.Println(fmt.Sprintf("wrong,%d,%s,%d", a, op, b))
 		}
 	})
