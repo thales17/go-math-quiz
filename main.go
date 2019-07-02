@@ -191,10 +191,10 @@ func main() {
 
 		if answerCalc == answer {
 			fmt.Fprintf(w, fmt.Sprintf(resultTempl, successArt, "Correct!"))
-			log.Println(fmt.Sprintf("correct,%d,%s,%d", a, op, b))
+			log.Println(fmt.Sprintf("correct,%d,%s,%d,%f", a, op, b, answer))
 		} else {
 			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, fmt.Sprintf("Wrong!<br/>Correct Answer: %.1f", answerCalc)))
-			log.Println(fmt.Sprintf("wrong,%d,%s,%d", a, op, b))
+			log.Println(fmt.Sprintf("wrong,%d,%s,%d,%f", a, op, b, answer))
 		}
 	})
 
