@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"math"
@@ -44,7 +45,7 @@ max-width: 4rem;
 				<input type="hidden" name="op" value="%s">
 				<input type="hidden" name="b" value="%d">
 				<label>=</label>
-				<input type="text" name="answer">
+				<input type="numeric" name="answer">
 				<button>Submit</button>
 			</form>
 		</main>
@@ -77,17 +78,29 @@ code {
 	<body>
 		<main>
 			<code>
-(\_/)<br/>
-<br/>
-( •,•)<br/>
-<br/>
-(")_(")<br/>
+			%s
 			</code>
 			<p>%s</p>
 			<a href="/">Next Question</a>
 		</main>
 	</body>
 </html>
+`
+
+const successArt = `
+(\_/)<br/>
+<br/>
+( •,•)<br/>
+<br/>
+(")_(")<br/>
+`
+
+const wrongArt = `
+  (•3•)<br/>
+<br/>
+ Z(  )z<br/>
+<br/>
+  /  \<br/>
 `
 
 func calcAnswer(a, b int, op string) (float64, error) {
@@ -110,11 +123,15 @@ func calcAnswer(a, b int, op string) (float64, error) {
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+	maxPtr := flag.Int("max", 10, "max integer value used in the quiz")
+	portPtr := flag.Int("port", 8666, "http port used by the web server")
+	levelPtr := flag.Int("level", 2, "level 1 = add, 2 = sub, 3 = mul, 4 = div")
+	flag.Parse()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ops := []string{"+", "-"}
-		op := ops[rand.Intn(len(ops))]
-		a := rand.Intn(10)
-		b := rand.Intn(10)
+		ops := []string{"+", "-", "*", "/"}
+		op := ops[rand.Intn(*levelPtr)]
+		a := rand.Intn(*maxPtr)
+		b := rand.Intn(*maxPtr)
 		if op == "-" {
 			tmp := a
 			a = int(math.Max(float64(a), float64(b)))
@@ -142,14 +159,14 @@ func main() {
 
 		a, err := strconv.Atoi(aVal)
 		if err != nil {
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, "Invalid Answer"))
 			log.Println(err)
 			return
 		}
 
 		b, err := strconv.Atoi(bVal)
 		if err != nil {
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, "Invalid Answer"))
 			log.Println(err)
 			return
 		}
@@ -157,27 +174,26 @@ func main() {
 		answer, err := strconv.ParseFloat(answerVal, 64)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, "Invalid Answer"))
 			return
 		}
 
 		answerCalc, err := calcAnswer(a, b, op)
 		if err != nil {
 			log.Println(err)
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Invalid Answer"))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, "Invalid Answer"))
 			return
 		}
 
 		if answerCalc == answer {
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, "Correct!"))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, successArt, "Correct!"))
 			log.Println(fmt.Sprintf("correct,%d,%s,%d", a, op, b))
 		} else {
-			fmt.Fprintf(w, fmt.Sprintf(resultTempl, fmt.Sprintf("Wrong!<br/>Correct Answer: %.1f", answerCalc)))
+			fmt.Fprintf(w, fmt.Sprintf(resultTempl, wrongArt, fmt.Sprintf("Wrong!<br/>Correct Answer: %.1f", answerCalc)))
 			log.Println(fmt.Sprintf("wrong,%d,%s,%d", a, op, b))
 		}
 	})
 
-	port := 8666
-	log.Printf("Starting server on %d\n", port)
-	http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	log.Printf("Starting server on %d\n", *portPtr)
+	http.ListenAndServe(fmt.Sprintf(":%d", *portPtr), nil)
 }
